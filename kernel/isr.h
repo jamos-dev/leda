@@ -4,11 +4,14 @@
 #include <stdint.h>
 
 struct registers {
-  uint32_t edi, esi, ebp, ebx, ecx, edx, eax, eip, cs, eflags, esp, ss;
+  uint32_t gs, fs, es, ds;
+  uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;
+  uint32_t int_no, err_code;
+  uint32_t eip, cs, eflags, user_esp, ss;
 };
 
 typedef struct registers registers_t;
 
-typedef void (*isr_handler_t)(int int_no, int err);
+typedef void (*isr_handler_t)(registers_t reg, int int_no, int err);
 
 #endif

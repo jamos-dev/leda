@@ -38,15 +38,15 @@ static const char *exception_messages[32] = {
     "Interrupt 31",
 };
 
-void isr_handler(int int_no, int err_code) {
-  printk("  ISR: int_no: %d, err_code: %d, msg: %s\n", int_no, err_code,
-         exception_messages[int_no]);
-  //  printk("eax=%x, ebx=%x, ecx=%x, edx=%x, esi=%x, edi=%x\n", regs->eax,
-  //  regs->ebx, regs->ecx, regs->edx, regs->esi, regs->edi); printk(" ds=%x,
-  //  es=%x,  gs=%x,  fs=%x\n", regs->ds, regs->es, regs->gs, regs->fs);
+void isr_handler(registers_t regs) {
+  printk("  ISR: int_no: %d, err_code: %d, msg: %s\n", regs.int_no,
+         regs.err_code, exception_messages[regs.int_no]);
+  printk("eax=%x, ebx=%x, ecx=%x, edx=%x, esi=%x, edi=%x\n", regs.eax, regs.ebx,
+         regs.ecx, regs.edx, regs.esi, regs.edi);
+  printk("ds=%x, es=%x, gs=%x, fs=%x\n", regs.ds, regs.es, regs.gs, regs.fs);
   //  printk("int_no=%d, err_no=%d", regs->int_no, regs->err_code);
-  //  printk("eip=%x, cs=%x, eflags=%x, esp=%x, ss=%x", regs->eip, regs->cs,
-  //  regs->eflags, regs->esp, regs->ss);
+  printk("eip=%x, cs=%x, eflags=%x, esp=%x, ss=%x", regs.eip, regs.cs,
+         regs.eflags, regs.user_esp, regs.ss);
   while (1)
     ;
 }

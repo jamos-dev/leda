@@ -56,11 +56,11 @@ extern isr_handler
 
 isr_common_stub:
 
-;	pushad
-;    push ds
-;    push es
-;    push fs
-;    push gs
+	pushad
+    push ds
+    push es
+    push fs
+    push gs
 
     push eax
 	mov ax, 0x10

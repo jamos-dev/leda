@@ -3,9 +3,9 @@ global gdt_load
 global idt_load
 
 memset:
-    mov edi, [esp + 8]
-    mov al, [esp + 12]
-    mov ecx, [esp + 16]
+    mov edi, [esp + 4]
+    mov al, [esp + 8]
+    mov ecx, [esp + 12]
 
     rep stosb
 
