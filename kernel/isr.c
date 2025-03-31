@@ -1,5 +1,10 @@
 #include "isr.h"
 #include "printk.h"
+#include <stdint.h>
+
+// TODO: move to corresponding modules
+void debug_info(registers_t regs);
+void panic();
 
 static isr_handler_t isr_routines[256] = {0};
 
@@ -38,15 +43,40 @@ static const char *exception_messages[32] = {
     "Interrupt 31",
 };
 
+void isr_register_handler(uint8_t int_no, isr_handler_t handler) {
+  isr_routines[int_no] = handler;
+}
+
 void isr_handler(registers_t regs) {
-  printk("  ISR: int_no: %d, err_code: %d, msg: %s\n", regs.int_no,
-         regs.err_code, exception_messages[regs.int_no]);
-  printk("eax=%x, ebx=%x, ecx=%x, edx=%x, esi=%x, edi=%x\n", regs.eax, regs.ebx,
-         regs.ecx, regs.edx, regs.esi, regs.edi);
-  printk("ds=%x, es=%x, gs=%x, fs=%x\n", regs.ds, regs.es, regs.gs, regs.fs);
-  //  printk("int_no=%d, err_no=%d", regs->int_no, regs->err_code);
-  printk("eip=%x, cs=%x, eflags=%x, esp=%x, ss=%x", regs.eip, regs.cs,
-         regs.eflags, regs.user_esp, regs.ss);
+  uint32_t int_no = regs.int_no;
+  isr_handler_t handler = isr_routines[int_no];
+
+  if (handler != 0) {
+    handler(regs);
+  } else {
+    printk("Unhandled exception: %s\n", exception_messages[int_no]);
+    debug_info(regs);
+    panic();
+  }
+}
+
+void irq_handler(registers_t regs) {}
+
+void debug_info(registers_t regs) {
+  printk("===============================================================\n");
+  printk("EAX=%x  ESI=%x  DS=%x  CS=%x\n", regs.eax, regs.esi, regs.ds,
+         regs.cs);
+  printk("EBX=%x  EDI=%x  ES=%x  SS=%x\n", regs.ebx, regs.edi, regs.es,
+         regs.ss);
+  printk("ECX=%x  EIP=%x  FS=%x\n", regs.ecx, regs.eip, regs.fs);
+  printk("EDX=%x  ESP=%x  GS=%x\n", regs.edx, regs.esp, regs.gs);
+  printk("EFLAGS=%x\n", regs.eflags);
+  printk("===============================================================\n");
+}
+
+// TODO: improve
+void panic() {
+  printk("Kernel panic!!!");
   while (1)
     ;
 }

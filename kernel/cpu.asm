@@ -1,4 +1,5 @@
 global memset
+global strlen
 global gdt_load
 global idt_load
 
@@ -10,6 +11,22 @@ memset:
     rep stosb
 
     mov ax, [esp + 8]
+
+    ret
+
+strlen:
+    mov esi, [esp + 4]
+    xor ecx, ecx
+    cld
+
+.next:
+    lodsb
+    inc ecx
+    or al, al
+    jnz .next
+
+    mov eax, ecx
+    dec eax
 
     ret
 
