@@ -1,9 +1,10 @@
 #include "isr.h"
+#include "debug.h"
+#include "io.h"
 #include "printk.h"
 #include <stdint.h>
 
 // TODO: move to corresponding modules
-void debug_info(registers_t regs);
 void panic();
 
 static isr_handler_t isr_routines[256] = {0};
@@ -43,40 +44,43 @@ static const char *exception_messages[32] = {
     "Interrupt 31",
 };
 
-void isr_register_handler(uint8_t int_no, isr_handler_t handler) {
-  isr_routines[int_no] = handler;
-}
+void isr_register_handler(uint8_t int_no, isr_handler_t handler) { isr_routines[int_no] = handler; }
 
 void isr_handler(registers_t regs) {
-  uint32_t int_no = regs.int_no;
-  isr_handler_t handler = isr_routines[int_no];
+    uint32_t int_no = regs.int_no;
+    isr_handler_t handler = isr_routines[int_no];
 
-  if (handler != 0) {
-    handler(regs);
-  } else {
-    printk("Unhandled exception: %s\n", exception_messages[int_no]);
-    debug_info(regs);
-    panic();
-  }
+    if (handler != 0) {
+        handler(regs);
+    } else {
+        printk("Unhandled exception: %s\n", exception_messages[int_no]);
+        debug_registers(regs);
+        panic();
+    }
 }
 
-void irq_handler(registers_t regs) {}
+void irq_handler(registers_t regs) {
+    uint32_t int_no;
+    isr_handler_t handler;
 
-void debug_info(registers_t regs) {
-  printk("===============================================================\n");
-  printk("EAX=%x  ESI=%x  DS=%x  CS=%x\n", regs.eax, regs.esi, regs.ds,
-         regs.cs);
-  printk("EBX=%x  EDI=%x  ES=%x  SS=%x\n", regs.ebx, regs.edi, regs.es,
-         regs.ss);
-  printk("ECX=%x  EIP=%x  FS=%x\n", regs.ecx, regs.eip, regs.fs);
-  printk("EDX=%x  ESP=%x  GS=%x\n", regs.edx, regs.esp, regs.gs);
-  printk("EFLAGS=%x\n", regs.eflags);
-  printk("===============================================================\n");
+    printk("b");
+
+    int_no = regs.int_no;
+    handler = isr_routines[int_no];
+
+    if (int_no >= IRQ8) {
+        outb(0xA0, 0x20);
+    }
+    outb(0x20, 0x20);
+
+    if (handler != 0) {
+        handler(regs);
+    }
 }
 
 // TODO: improve
 void panic() {
-  printk("Kernel panic!!!");
-  while (1)
-    ;
+    printk("Kernel panic!!!");
+    while (1)
+        ;
 }
